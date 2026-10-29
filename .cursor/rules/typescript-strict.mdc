@@ -1,0 +1,50 @@
+---
+description: TypeScript ketat — static typing, no ambiguity, selaras tsconfig
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript Strict
+
+Selaras `tsconfig.json` (`strict`, `noUnusedLocals`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, dll).
+
+## Wajib
+
+- Jangan `any`. Prefer `unknown` lalu narrow.
+- Jangan `as` untuk membungkam error; gunakan type guard / validasi.
+- Import tipe dengan `import type`; hormati `verbatimModuleSyntax`.
+- Tangani `undefined` dari index access (`arr[i]`, `map.get`, `record[key]`).
+- Optional property: jangan assign `undefined` eksplisit jika exact optional; omit key.
+- Catch: `catch (error: unknown)` lalu `errorMessage(error)` / narrow.
+- Tidak boleh unused locals/params (prefix `_` hanya jika signature wajib).
+- Return type eksplisit pada fungsi publik / boundary (handler, service export).
+
+## Contoh
+
+```typescript
+// ❌
+function handle(payload: any) {
+  const id = payload.userId as string;
+}
+
+// ✅
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null;
+}
+
+function handle(payload: unknown): void {
+  if (!isRecord(payload)) {
+    return;
+  }
+  const id = payload['userId'];
+  if (typeof id !== 'string' || id === '') {
+    return;
+  }
+}
+```
+
+## Compile
+
+- Kode harus lulus `npm run typecheck` / `tsc --noEmit`.
+- Jangan longgarkan `tsconfig` untuk “biar jalan”.
+---

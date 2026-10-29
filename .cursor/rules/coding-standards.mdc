@@ -1,0 +1,46 @@
+---
+description: Standar kode — sederhana, efisien, aman, durable, maintainable, performa tinggi
+alwaysApply: true
+---
+
+# Coding Standards
+
+## Prinsip
+
+- Sesimple mungkin: satu tanggung jawab per fungsi/modul; hindari abstraksi prematur.
+- Minim komentar: komentar hanya untuk intent non-obvious (why), bukan narasi what.
+- Efisien & performa: O(n) jelas, hindari alokasi/loop berlebih, I/O blocking di hot path, N+1 query/Redis.
+- Aman: validasi input di boundary; jangan percaya payload client/Redis; jangan log secret.
+- Durable: gagal eksplisit (throw/return error), jangan swallow; cleanup resource (socket, timer, koneksi).
+- Maintainable: nama jelas, tipe eksplisit di boundary, pola yang sudah ada di repo.
+
+## Wajib
+
+- Ikuti struktur & pola existing (`src/core`, `src/modules`, `.js` extension pada import ESM).
+- Prefer early return daripada nested if dalam.
+- Reuse helper/service yang ada; jangan duplikasi.
+- Jangan tambah dependency tanpa alasan kuat.
+- Jangan buat unit test kecuali diminta eksplisit.
+- Jangan ubah file di luar scope request.
+
+## Hindari
+
+```typescript
+// ❌ komentar narasi / dead code / over-engineer
+// Get user from redis then emit
+const data = await redis.get(key); // get key
+abstract class BaseFactoryProviderManager {}
+
+// ✅ langsung, jelas
+const raw = await redis.get(key);
+if (raw === null) {
+  return;
+}
+```
+
+## Performa (WebSocket / Redis)
+
+- Hot path (connect, emit, broadcast): kerja minimal, tanpa sync fs/heavy JSON jika tidak perlu.
+- Batch/pipeline Redis bila banyak perintah berurutan.
+- Hindari menyimpan state besar di memori proses tanpa batas/TTL.
+---
